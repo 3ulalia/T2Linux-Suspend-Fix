@@ -286,14 +286,18 @@ sudo tee /usr/local/bin/fix-kbd-backlight.sh > /dev/null << 'EOF'
 #!/bin/sh
 # Keyboard backlight fix for apple-bce after boot
 
-KBD_PATH="/sys/class/leds/:white:kbd_backlight/brightness"
+find_kbd_path() {
+    ls -1 /sys/class/leds/*kbd_backlight*/brightness 2>/dev/null | head -n1
+}
 
-if [ -f "$KBD_PATH" ]; then
+KBD_PATH="$(find_kbd_path)"
+if [ -n "$KBD_PATH" ] && [ -f "$KBD_PATH" ]; then
     echo 1000 > "$KBD_PATH" 2>/dev/null || true
 else
     # Poll up to 10s before forcing a BCE reset
     for i in 1 2 3 4 5 6 7 8 9 10; do
-        if [ -f "$KBD_PATH" ]; then
+        KBD_PATH="$(find_kbd_path)"
+        if [ -n "$KBD_PATH" ] && [ -f "$KBD_PATH" ]; then
             echo 1000 > "$KBD_PATH" 2>/dev/null && exit 0
         fi
         command -v brightnessctl >/dev/null 2>&1 && brightnessctl -rd :white:kbd_backlight >/dev/null 2>&1 && exit 0
@@ -304,7 +308,8 @@ else
     rmmod -f apple-bce 2>/dev/null || true
     modprobe apple-bce
     for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
-        if [ -f "$KBD_PATH" ]; then
+        KBD_PATH="$(find_kbd_path)"
+        if [ -n "$KBD_PATH" ] && [ -f "$KBD_PATH" ]; then
             echo 1000 > "$KBD_PATH" 2>/dev/null && exit 0
         fi
         command -v brightnessctl >/dev/null 2>&1 && brightnessctl -rd :white:kbd_backlight >/dev/null 2>&1 && exit 0
