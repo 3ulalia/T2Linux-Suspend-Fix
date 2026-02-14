@@ -10,7 +10,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
-VERSION="1.4.0"
+VERSION="1.5.0"
 
 BACKUP_DIR="/etc/t2-suspend-fix"
 THERMALD_STATE_FILE="${BACKUP_DIR}/thermald_enabled"
@@ -386,10 +386,10 @@ ExecStart=/usr/sbin/modprobe brcmfmac
 ExecStart=/usr/sbin/modprobe brcmfmac_wcc
 # 4. Restore keyboard backlight on resume
 ExecStartPost=-/usr/local/bin/fix-kbd-backlight.sh
+# 5. Final WiFi check (after 5s) and retry modprobe if needed
+ExecStartPost=/bin/sh -c 'sleep 5; if ! ls /sys/bus/pci/drivers/brcmfmac/*:* >/dev/null 2>&1; then modprobe -r brcmfmac 2>/dev/null || true; modprobe brcmfmac 2>/dev/null || true; modprobe brcmfmac_wcc 2>/dev/null || true; fi'
 # 5. Activate WiFi again
 ExecStartPost=-/usr/bin/nmcli radio wifi on
-# 6. Final WiFi check (after 5s) and retry modprobe if needed
-ExecStartPost=/bin/sh -c 'sleep 5; if ! ls /sys/bus/pci/drivers/brcmfmac/*:* >/dev/null 2>&1; then modprobe -r brcmfmac 2>/dev/null || true; modprobe brcmfmac 2>/dev/null || true; modprobe brcmfmac_wcc 2>/dev/null || true; fi'
 
 [Install]
 WantedBy=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
