@@ -603,13 +603,24 @@ patch_systemd_boot_entry_file() {
 set_kargs_systemd_boot() {
     local touched=0
 
+    local cmdline_dest=/etc/kernel/cmdline
+    if [[ $OS_ID = "nixos" ]]; then
+      read_first_line /proc/cmdline > ./new_cmdline
+      cmdline_dest=./new_cmdline
+    fi
+
     if [[ -f /etc/kernel/cmdline ]]; then
         log "Setting kernel-args in /etc/kernel/cmdline"
         local current new
         current="$(cat /etc/kernel/cmdline)"
         new="$(append_args_once_to_string "$current" "${KARGS[@]}")"
-        printf '%s\n' "$new" > /etc/kernel/cmdline
+        printf '%s\n' "$new" > $cmdline_dest
         touched=1
+    fi
+
+    if [[ $OS_ID = "nixos" ]]; then
+      log "you will need to set your kernel command line to match ./new_cmdline"
+      return 0
     fi
 
     local entry
