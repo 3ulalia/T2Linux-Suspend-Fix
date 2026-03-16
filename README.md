@@ -119,12 +119,12 @@ sudo lspci -vvv -s "$T2" | grep -E "LnkCap|LnkCtl|LnkSta|PM"
 
 If it hangs on resume and you need to hard reboot please post the output of prior boot:
 ```
-journalctl -b -1 -k
+journalctl -b -1
 ```
 
 Otherwise current boot:
 ```
-journalctl -b -0 -k
+journalctl -b -0
 ```
 
 
