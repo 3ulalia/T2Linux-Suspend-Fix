@@ -60,19 +60,48 @@ disable_all_s3_wakeup() {
 }
 
 cleanup_prior_systemd_fixes() {
-    log "Cleaning up prior systemd fixes if present"
-    systemctl disable suspend-fix-t2.service 2>/dev/null || true
-    systemctl disable suspend-wifi-unload.service 2>/dev/null || true
-    systemctl disable resume-wifi-reload.service 2>/dev/null || true
-    systemctl disable fix-kbd-backlight.service 2>/dev/null || true
+  local files_in_etc_system=(suspend-fix-t2.service suspend-wifi-unload.service fix-kbd-backlight.service resume-wifi-reload.service)
+  local files_in_usr_lib=(t2-resync 90-t2-hibernate-test-brcmfmac.sh)
+    case "${OS_ID}" in
+        nixos)
+            detected=false
+            det_list=()
+            for etc_file in $files_in_etc_system; do
+              if [[ -f /etc/systemd/system/$etc_file ]]; then
+                detected=true
+                det_list+=($etc_file)
+              fi
+            done
+            for usr_lib_file in $files_in_usr_lib; do
+              if [[ -f /usr/lib/systemd/system-sleep/$usr_lib_file ]]; then
+                detected=true
+                det_list+=($usr_lib_file)
+              fi
+            done
+            if [[ ($detected) ]]; then
+              log "Found the following systemd services that should be disabled:"
+              for f in $det_list; do
+                log "  $f"
+              done
+            else 
+              log "No systemd services need to be disabled! nice."
+            fi
+            ;;
+        *)
+            log "Cleaning up prior systemd fixes if present"
+            for svc in $files_in_etc_system; do
+              systemctl disable "$svc" 2>/dev/null || true
+            done
 
-    rm -f /etc/systemd/system/suspend-wifi-unload.service
-    rm -f /etc/systemd/system/resume-wifi-reload.service
-    rm -f /etc/systemd/system/fix-kbd-backlight.service
-    rm -f /etc/systemd/system/suspend-fix-t2.service
-    rm -f /usr/lib/systemd/system-sleep/t2-resync
-    rm -f /usr/lib/systemd/system-sleep/90-t2-hibernate-test-brcmfmac.sh
-}
+            for svc_file in $files_in_etc_system; do
+              rm -f /etc/systemd/system/"$svc_file"
+            done
+
+            for svc_file in $files_in_usr_lib; do
+              rm -f /usr/lib/systemd/system-sleep/"$svc_file"
+            done
+        esac
+  }
 
 choose_audio_workaround() {
     echo
