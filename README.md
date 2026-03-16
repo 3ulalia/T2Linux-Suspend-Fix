@@ -55,10 +55,15 @@ else
 fi
 echo ""
 echo "- tiny-dfr -"
+if systemctl cat tiny-dfr.service >/dev/null 2>&1; then
+        echo "tiny-dfr service is installed"
+    else
+        echo "no tiny-dfr is installed"
+    fi
 if systemctl is-active --quiet tiny-dfr.service 2>/dev/null; then
         echo "tiny-dfr is active"
     else
-        echo "no tiny-dfr"
+        echo "tiny-dfr is inactive"
     fi
 echo ""
 echo "- desktop environment - "
@@ -109,8 +114,7 @@ sudo lspci -vvv -s "$RP" | grep -E "LnkCap|LnkCtl|LnkSta|L1Sub|PM"
 
 echo ""
 echo "- T2 Endpoint PCIe Info -"
-sudo lspci -vvv -s "$T2" | grep -E "LnkCap|LnkCtl|LnkSta|PM" 
-
+sudo lspci -vvv -s "$T2" | grep -E "LnkCap|LnkCtl|LnkSta|PM"
 ```
 
 If it hangs on resume and you need to hard reboot please post the output of prior boot:
