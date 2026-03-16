@@ -125,6 +125,10 @@ load_os_release() {
     . /etc/os-release
     OS_ID="${ID:-}"
     OS_LIKE="${ID_LIKE:-}"
+    if [[ "$OS_ID" = "nixos" ]]; then
+      SUSPEND_UNIT_PATH="./${SUSPEND_UNIT_NAME}"
+      GUARD_UNIT_PATH="./${GUARD_UNIT_NAME}"
+    fi
 }
 
 read_first_line() {
@@ -506,10 +510,15 @@ EOF
 }
 
 enable_units() {
-    log "Reload systemd and activate"
-    systemctl daemon-reload
-    systemctl enable "${SUSPEND_UNIT_NAME}"
-    systemctl enable "${GUARD_UNIT_NAME}"
+    if [[ ! "$OS_ID" = "nixos" ]]; then
+        log "Reload systemd and activate"
+        systemctl daemon-reload
+        systemctl enable "${SUSPEND_UNIT_NAME}"
+        systemctl enable "${GUARD_UNIT_NAME}"
+    else
+        log "You will need to implement $SUSPEND_UNIT_PATH and $GUARD_UNIT_PATH yourself in your NixOS configuration."
+    fi
+
 }
 
 set_kargs_fedora() {
