@@ -547,8 +547,18 @@ set_kargs_grub_classic() {
     local grub_file="/etc/default/grub"
     [[ -f "$grub_file" ]] || die "${grub_file} missing"
 
+    if [[ "$OS_ID" = "nixos" ]]; then
+        cp $grub_file ./new_grubfile
+        grub_file="./new_grubfile"
+    fi
+
     log "Set kernel-Args in ${grub_file}"
     update_grub_var_file "$grub_file" "GRUB_CMDLINE_LINUX"
+    
+    if [[ "$OS_ID" = "nixos" ]]; then
+      log "you will need to update your grub config to match ./new_grubfile."
+      return 0
+    fi
 
     local cfg
 
