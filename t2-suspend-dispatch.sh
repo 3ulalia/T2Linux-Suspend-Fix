@@ -193,7 +193,7 @@ detect_touchbar() {
 detect_tiny_dfr() {
     HAS_TINY_DFR=0
 
-    if systemctl is-active --quiet tiny-dfr.service 2>/dev/null; then
+    if systemctl cat tiny-dfr.service >/dev/null 2>&1; then
         HAS_TINY_DFR=1
         return
     fi
