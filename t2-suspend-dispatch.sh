@@ -642,7 +642,7 @@ dispatch_kargs() {
         ubuntu|debian|linuxmint|pop|neon|elementary)
             set_kargs_grub_classic
             ;;
-        arch|endeavouros|manjaro)
+        arch|endeavouros|manjaro|nixos)
             if [[ -d /boot/loader/entries || -d /efi/loader/entries || -f /etc/kernel/cmdline ]]; then
                 set_kargs_systemd_boot
             elif [[ -f /etc/default/grub ]]; then
