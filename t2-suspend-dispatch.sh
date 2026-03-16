@@ -382,7 +382,7 @@ Type=oneshot
 RemainAfterExit=yes
 
 # @feature audio_user_session
-ExecStart=-/usr/bin/bash -lc 'uid=$(loginctl list-sessions --no-legend 2>/dev/null | awk "{print \$2}" | head -n1); [ -n "$uid" ] || exit 0; [ -S "/run/user/$uid/bus" ] || exit 0; username=$(id -nu "$uid" 2>/dev/null) || exit 0; XDG_RUNTIME_DIR="/run/user/$uid" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" runuser -u "$username" -- systemctl --user stop pipewire.socket pipewire-pulse.socket pipewire.service pipewire-pulse.service wireplumber.service 2>/dev/null || true'
+ExecStart=-/usr/bin/bash -lc 'set -- $(loginctl list-sessions --no-legend 2>/dev/null | head -n1); uid=$2; [ -n "$uid" ] || exit 0; [ -S "/run/user/$uid/bus" ] || exit 0; username=$(id -nu "$uid" 2>/dev/null) || exit 0; XDG_RUNTIME_DIR="/run/user/$uid" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" runuser -u "$username" -- systemctl --user stop pipewire.socket pipewire-pulse.socket pipewire.service pipewire-pulse.service wireplumber.service 2>/dev/null || true'
 # @endfeature
 # @feature gmux_igd
 ExecStart=-/usr/bin/rmmod -f apple_gmux
@@ -446,7 +446,7 @@ ExecStopPost=-/usr/bin/sh -c "/usr/bin/echo 255 | /usr/bin/tee /sys/class/leds/a
 ExecStopPost=-/bin/bash -c "/bin/echo 255 | tee /sys/class/leds/:white:kbd_backlight/brightness"
 # @endfeature
 # @feature audio_user_session
-ExecStopPost=-/usr/bin/bash -lc 'uid=$(loginctl list-sessions --no-legend 2>/dev/null | awk "{print \$2}" | head -n1); [ -n "$uid" ] || exit 0; [ -S "/run/user/$uid/bus" ] || exit 0; username=$(id -nu "$uid" 2>/dev/null) || exit 0; XDG_RUNTIME_DIR="/run/user/$uid" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" runuser -u "$username" -- systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service 2>/dev/null || true'
+ExecStopPost=-/usr/bin/bash -lc 'set -- $(loginctl list-sessions --no-legend 2>/dev/null | head -n1); uid=$2; [ -n "$uid" ] || exit 0; [ -S "/run/user/$uid/bus" ] || exit 0; username=$(id -nu "$uid" 2>/dev/null) || exit 0; XDG_RUNTIME_DIR="/run/user/$uid" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" runuser -u "$username" -- systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service 2>/dev/null || true'
 # @endfeature
 # @feature touchbar
 ExecStopPost=-/usr/bin/systemctl restart upower
